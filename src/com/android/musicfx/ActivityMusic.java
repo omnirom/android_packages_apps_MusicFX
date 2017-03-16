@@ -39,9 +39,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
-import android.media.AudioPort;
-import android.media.AudioPatch;
-import android.media.AudioManager.OnAudioPortUpdateListener;
 import android.media.audiofx.AudioEffect;
 import android.media.audiofx.AudioEffect.Descriptor;
 import android.os.Bundle;
@@ -127,11 +124,14 @@ public class ActivityMusic extends Activity {
 
     private boolean mIsHeadsetOn = false;
     private boolean mIsSpeakerOn = false;
-    private boolean mIsComboDevice = false;
+    private boolean mIsBluetoothOn = false;
+
     private ToggleButton mToggleSwitch;
     private TextView toggleSwithText;
     private StringBuilder mFormatBuilder = new StringBuilder();
     private Formatter mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
+
+    private String mCurrentLevel = ControlPanelEffect.SPEAKER_PREF_SCOPE;
 
     // Preset Reverb fields
     /**
@@ -147,59 +147,24 @@ public class ActivityMusic extends Activity {
      */
     private Context mContext;
 
-    /**
-     * AudioPortUpdateListener to handle UI update on device change
-     */
-    private MyOnAudioPortUpdateListener mAudioPortUpdateListener = null;
-
-    private class MyOnAudioPortUpdateListener implements OnAudioPortUpdateListener {
-        /**
-         * Callback method called upon audio port list update.
-         */
+    private final BroadcastReceiver mPrefLevelChanged = new BroadcastReceiver() {
         @Override
-        public void onAudioPortListUpdate(AudioPort[] portList) {
-            final boolean isHeadsetOnPrev = mIsHeadsetOn;
-            final boolean isSpeakerOnPrev = mIsSpeakerOn;
-            AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-
-            mIsHeadsetOn = false;
-            mIsSpeakerOn = false;
-            mIsComboDevice = false;
-
-            int device = am.getDevicesForStream(AudioManager.STREAM_MUSIC);
-            if (device == AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES ||
-                device == AudioManager.DEVICE_OUT_BLUETOOTH_A2DP ||
-                device == AudioManager.DEVICE_OUT_WIRED_HEADPHONE ||
-                device == AudioManager.DEVICE_OUT_WIRED_HEADSET) {
-                mIsHeadsetOn = true;
-            } else if (device == AudioManager.DEVICE_OUT_SPEAKER) {
-                mIsSpeakerOn = true;
-            } else if (device == (AudioManager.DEVICE_OUT_SPEAKER |
-                                   AudioManager.DEVICE_OUT_WIRED_HEADPHONE)) {
-                mIsComboDevice = true;
+        public void onReceive(final Context context, final Intent intent) {
+            final String action = intent.getAction();
+            if (action.equals(ControlPanelEffect.PREF_SCOPE_CHANGED)) {
+                Log.i(TAG, "onReceive " + action);
+                if ((mVirtualizerSupported) || (mBassBoostSupported) || (mEqualizerSupported)
+                        || (mPresetReverbSupported)) {
+                    String currentLevel = ControlPanelEffect.getCurrentPrevLevel(ActivityMusic.this);
+                    if (!currentLevel.equals(mCurrentLevel)) {
+                        mCurrentLevel = currentLevel;
+                        mIsHeadsetOn = mCurrentLevel.equals(ControlPanelEffect.HEADSET_PREF_SCOPE);
+                        mIsSpeakerOn = mCurrentLevel.equals(ControlPanelEffect.SPEAKER_PREF_SCOPE);
+                        mIsBluetoothOn = mCurrentLevel.equals(ControlPanelEffect.BLUETOOTH_PREF_SCOPE);
+                        updateUI();
+                    }
+                }
             }
-
-            Log.d(TAG, "onAudioPortListUpdate: device=" + device);
-            if (isHeadsetOnPrev != mIsHeadsetOn || isSpeakerOnPrev != mIsSpeakerOn) {
-                Log.d(TAG, "updateUIHeadset: mIsHeadsetOn: " + mIsHeadsetOn + " mIsSpeakerOn: " + mIsSpeakerOn);
-                updateUIHeadset(false);
-            }
-        }
-
-        /**
-         * Callback method called upon audio patch list update.
-         */
-        @Override
-        public void onAudioPatchListUpdate(AudioPatch[] patchList) {
-            // Ingore audio port update
-        }
-
-        /**
-         * Callback method called when the mediaserver dies
-         */
-        @Override
-        public void onServiceDied() {
-            // Nothing to Do
         }
     };
 
@@ -250,11 +215,11 @@ public class ActivityMusic extends Activity {
 
         // Fill array with presets from AudioEffects call.
         // allocate a space for 1 extra strings (User)
-        final int numPresets = ControlPanelEffect.getParameterInt(mContext,
+        final int numPresets = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_num_presets);
         mEQPresetNames = new String[numPresets + 1];
         for (short i = 0; i < numPresets; i++) {
-            final String eqPresetName = ControlPanelEffect.getParameterString(mContext,
+            final String eqPresetName = ControlPanelEffect.getParameterString(mContext, mCurrentLevel,
                     ControlPanelEffect.Key.eq_preset_name, i);
             mEQPresetNames[i] = localizePresetName(eqPresetName);
         }
@@ -281,7 +246,7 @@ public class ActivityMusic extends Activity {
                         final boolean isChecked) {
                     toggleSwithText.setText(isChecked? R.string.toggle_button_on : R.string.toggle_button_off);
                     // set parameter and state
-                    ControlPanelEffect.setEnabled(mContext, isChecked);
+                    ControlPanelEffect.setEnabled(mContext, mCurrentLevel, isChecked);
                     // Enable Linear layout (in scroll layout) view with all
                     // effect contents depending on checked state
                     setEnabledAllChildren(viewGroup, isChecked);
@@ -290,9 +255,6 @@ public class ActivityMusic extends Activity {
                     setInterception(isChecked);
                 }
             });
-            // Init device info
-            MyOnAudioPortUpdateListener al = new MyOnAudioPortUpdateListener();
-            al.onAudioPortListUpdate(null);
 
             // Initialize the Virtualizer elements.
             // Set the SeekBar listener.
@@ -307,21 +269,17 @@ public class ActivityMusic extends Activity {
                     public void onValueChanged(final Knob knob, final int value,
                         final boolean fromUser) {
                         // set parameter and state
-                        ControlPanelEffect.setParameterInt(mContext,
+                        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                                 ControlPanelEffect.Key.virt_strength, value);
                     }
 
                     @Override
                     public boolean onSwitchChanged(final Knob knob, boolean on) {
-                        if (on && (!mIsHeadsetOn && mVirtualizerIsHeadphoneOnly)) {
-                            if (mIsComboDevice) {
-                                showHeadsetMsg(getString(R.string.combo_device));
-                            } else {
-                                showHeadsetMsg(getString(R.string.headset_plug));
-                            }
+                        if (on && (!mIsHeadsetOn && !mIsBluetoothOn && mVirtualizerIsHeadphoneOnly)) {
+                            showHeadsetMsg(getString(R.string.headset_plug));
                             return false;
                         }
-                        ControlPanelEffect.setParameterBoolean(mContext,
+                        ControlPanelEffect.setParameterBoolean(mContext, mCurrentLevel,
                                 ControlPanelEffect.Key.virt_enabled, on);
                         return true;
                     }
@@ -342,21 +300,13 @@ public class ActivityMusic extends Activity {
                     public void onValueChanged(final Knob knob, final int value,
                             final boolean fromUser) {
                         // set parameter and state
-                        ControlPanelEffect.setParameterInt(mContext,
+                        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                                 ControlPanelEffect.Key.bb_strength, value);
                     }
 
                     @Override
                     public boolean onSwitchChanged(final Knob knob,boolean on) {
-                        if (on && !mIsHeadsetOn  && !mIsSpeakerOn) {
-                            if (mIsComboDevice) {
-                                showHeadsetMsg(getString(R.string.combo_device));
-                            } else {
-                                showHeadsetMsg(getString(R.string.headset_plug));
-                            }
-                            return false;
-                        }
-                        ControlPanelEffect.setParameterBoolean(mContext,
+                        ControlPanelEffect.setParameterBoolean(mContext, mCurrentLevel,
                                 ControlPanelEffect.Key.bb_enabled, on);
                         return true;
                     }
@@ -365,7 +315,7 @@ public class ActivityMusic extends Activity {
 
             // Initialize the Equalizer elements.
             if (mEqualizerSupported) {
-                mEQPreset = ControlPanelEffect.getParameterInt(mContext,
+                mEQPreset = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                         ControlPanelEffect.Key.eq_current_preset);
                 if (mEQPreset >= mEQPresetNames.length) {
                     mEQPreset = 0;
@@ -377,7 +327,7 @@ public class ActivityMusic extends Activity {
             // Initialize the Preset Reverb elements.
             // Set Spinner listeners.
             if (mPresetReverbSupported) {
-                mPRPreset = ControlPanelEffect.getParameterInt(mContext,
+                mPRPreset = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                         ControlPanelEffect.Key.pr_current_preset);
                 mPRPresetPrevious = mPRPreset;
                 reverbSpinnerInit((Spinner)findViewById(R.id.prSpinner));
@@ -423,7 +373,8 @@ public class ActivityMusic extends Activity {
 
     /*
      * (non-Javadoc)
-     *
+     *            // Update UI
+
      * @see android.app.Activity#onResume()
      */
     @Override
@@ -431,15 +382,15 @@ public class ActivityMusic extends Activity {
         super.onResume();
         if ((mVirtualizerSupported) || (mBassBoostSupported) || (mEqualizerSupported)
                 || (mPresetReverbSupported)) {
-            // Register for AudioPortUpdateListener that might affect the onscreen UI.
-            if (mAudioPortUpdateListener == null) {
-                AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-                mAudioPortUpdateListener = new MyOnAudioPortUpdateListener();
-                am.registerAudioPortUpdateListener(mAudioPortUpdateListener);
-            }
-
-            // Update UI
+            mCurrentLevel = ControlPanelEffect.getCurrentPrevLevel(this);
+            mIsHeadsetOn = mCurrentLevel.equals(ControlPanelEffect.HEADSET_PREF_SCOPE);
+            mIsSpeakerOn = mCurrentLevel.equals(ControlPanelEffect.SPEAKER_PREF_SCOPE);
+            mIsBluetoothOn = mCurrentLevel.equals(ControlPanelEffect.BLUETOOTH_PREF_SCOPE);
             updateUI();
+            
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(ControlPanelEffect.PREF_SCOPE_CHANGED);
+            registerReceiver(mPrefLevelChanged, intentFilter);
         }
     }
 
@@ -451,15 +402,10 @@ public class ActivityMusic extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-
-        // Unregister AudioPortUpdateListener. (These affect the visible UI,
-        // so we only care about them while we're in the foreground.)
-        if (mAudioPortUpdateListener != null) {
-            AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-            am.unregisterAudioPortUpdateListener(mAudioPortUpdateListener);
-            mAudioPortUpdateListener = null;
+        try {
+            unregisterReceiver(mPrefLevelChanged);
+        } catch (Exception e) {
         }
-
     }
 
     private void reverbSpinnerInit(Spinner spinner) {
@@ -523,11 +469,11 @@ public class ActivityMusic extends Activity {
             }
 
             if (enabled && view == virt) {
-                on = ControlPanelEffect.getParameterBoolean(mContext,
+                on = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                         ControlPanelEffect.Key.virt_enabled);
                 view.setEnabled(on);
             } else if (enabled && view == bb) {
-                on = ControlPanelEffect.getParameterBoolean(mContext,
+                on = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                         ControlPanelEffect.Key.bb_enabled);
                 view.setEnabled(on);
             } else if (enabled && view == eq) {
@@ -543,7 +489,7 @@ public class ActivityMusic extends Activity {
      * Updates UI (checkbox, seekbars, enabled states) according to the current stored preferences.
      */
     private void updateUI() {
-        final boolean isEnabled = ControlPanelEffect.getParameterBoolean(mContext,
+        final boolean isEnabled = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.global_enabled);
         mToggleSwitch.setChecked(isEnabled);
         toggleSwithText.setText(isEnabled? R.string.toggle_button_on : R.string.toggle_button_off);
@@ -553,18 +499,18 @@ public class ActivityMusic extends Activity {
         if (mVirtualizerSupported) {
             Knob knob = (Knob) findViewById(R.id.vIStrengthKnob);
             int strength = ControlPanelEffect
-                    .getParameterInt(mContext,
+                    .getParameterInt(mContext, mCurrentLevel,
                             ControlPanelEffect.Key.virt_strength);
             knob.setValue(strength);
             boolean hasStrength = ControlPanelEffect.getParameterBoolean(mContext,
-                    ControlPanelEffect.Key.virt_strength_supported);
+                    mCurrentLevel, ControlPanelEffect.Key.virt_strength_supported);
             if (!hasStrength) {
                 knob.setVisibility(View.GONE);
             }
         }
         if (mBassBoostSupported) {
             ((Knob) findViewById(R.id.bBStrengthKnob)).setValue(ControlPanelEffect
-                    .getParameterInt(mContext,
+                    .getParameterInt(mContext, mCurrentLevel,
                             ControlPanelEffect.Key.bb_strength));
         }
         if (mEqualizerSupported) {
@@ -572,7 +518,7 @@ public class ActivityMusic extends Activity {
         }
         if (mPresetReverbSupported) {
             int reverb = ControlPanelEffect.getParameterInt(
-                                    mContext,
+                                    mContext, mCurrentLevel,
                                     ControlPanelEffect.Key.pr_current_preset);
             ((Spinner)findViewById(R.id.prSpinner)).setSelection(reverb);
         }
@@ -607,21 +553,17 @@ public class ActivityMusic extends Activity {
     private void updateUIHeadset(boolean force) {
         final Knob bBKnob = (Knob) findViewById(R.id.bBStrengthKnob);
         //bBKnob.setBinary(mIsSpeakerOn);
-        bBKnob.setEnabled(mToggleSwitch.isChecked()
-                && (mIsHeadsetOn || mIsSpeakerOn));
+        bBKnob.setEnabled(mToggleSwitch.isChecked());
         final Knob vIKnob = (Knob) findViewById(R.id.vIStrengthKnob);
-        vIKnob.setEnabled(mToggleSwitch.isChecked()
-                && (mIsHeadsetOn || mIsSpeakerOn));
+        vIKnob.setEnabled(mToggleSwitch.isChecked());
 
         if (!force) {
-            boolean on = ControlPanelEffect.getParameterBoolean(mContext,
+            boolean on = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                     ControlPanelEffect.Key.bb_enabled);
-            bBKnob.setOn(mToggleSwitch.isChecked()
-                    && (mIsHeadsetOn || mIsSpeakerOn) && on);
-            on = ControlPanelEffect.getParameterBoolean(mContext,
+            bBKnob.setOn(mToggleSwitch.isChecked() && on);
+            on = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                     ControlPanelEffect.Key.virt_enabled);
-            vIKnob.setOn(mToggleSwitch.isChecked()
-                    && (mIsHeadsetOn || mIsSpeakerOn) && on);
+            vIKnob.setOn(mToggleSwitch.isChecked() && on);
         }
     }
 
@@ -630,13 +572,13 @@ public class ActivityMusic extends Activity {
      */
     private void equalizerBandsInit(LinearLayout eqcontainer) {
         // Initialize the N-Band Equalizer elements.
-        mNumberEqualizerBands = ControlPanelEffect.getParameterInt(mContext,
+        mNumberEqualizerBands = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_num_bands);
-        mEQPresetUserBandLevelsPrev = ControlPanelEffect.getParameterIntArray(mContext,
+        mEQPresetUserBandLevelsPrev = ControlPanelEffect.getParameterIntArray(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_preset_user_band_level);
-        final int[] centerFreqs = ControlPanelEffect.getParameterIntArray(mContext,
+        final int[] centerFreqs = ControlPanelEffect.getParameterIntArray(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_center_freq);
-        final int[] bandLevelRange = ControlPanelEffect.getParameterIntArray(mContext,
+        final int[] bandLevelRange = ControlPanelEffect.getParameterIntArray(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_level_range);
         mEqualizerMinBandLevel = (int) Math.min(EQUALIZER_MIN_LEVEL, bandLevelRange[0]);
         final int mEqualizerMaxBandLevel = (int) Math.max(EQUALIZER_MAX_LEVEL, bandLevelRange[1]);
@@ -736,7 +678,7 @@ public class ActivityMusic extends Activity {
     private void equalizerUpdateDisplay() {
         // Update and show the active N-Band Equalizer bands.
         final int[] bandLevels = ControlPanelEffect.getParameterIntArray(mContext,
-                ControlPanelEffect.Key.eq_band_level);
+                mCurrentLevel, ControlPanelEffect.Key.eq_band_level);
         for (short band = 0; band < mNumberEqualizerBands; band++) {
             final int level = bandLevels[band];
             final int progress = level - mEqualizerMinBandLevel;
@@ -753,7 +695,7 @@ public class ActivityMusic extends Activity {
      *            EQ band level
      */
     private void equalizerBandUpdate(final int band, final int level) {
-        ControlPanelEffect.setParameterInt(mContext,
+        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_band_level, level, band);
     }
 
@@ -764,7 +706,7 @@ public class ActivityMusic extends Activity {
      *            EQ preset id.
      */
     private void equalizerSetPreset(final int preset) {
-        ControlPanelEffect.setParameterInt(mContext,
+        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_current_preset, preset);
         equalizerUpdateDisplay();
     }
@@ -776,7 +718,7 @@ public class ActivityMusic extends Activity {
      *            PR preset id.
      */
     private void presetReverbSetPreset(final int preset) {
-        ControlPanelEffect.setParameterInt(mContext,
+        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.pr_current_preset, preset);
     }
 
