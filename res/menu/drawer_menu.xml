@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/menu_speaker"
+            android:title="@string/drawer_item_speaker"
+            android:icon="@drawable/ic_speaker" />
+        <item
+            android:id="@+id/menu_headset"
+            android:title="@string/drawer_item_headset"
+            android:icon="@drawable/ic_headphones" />
+        <item
+            android:id="@+id/menu_bluetooth"
+            android:title="@string/drawer_item_bluetooth"
+            android:icon="@drawable/ic_bluetooth" />
+    </group>
+</menu>
+        
