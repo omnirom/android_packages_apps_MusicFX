@@ -69,29 +69,5 @@ public class ControlPanelReceiver extends BroadcastReceiver {
         if (action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
             ControlPanelEffect.closeSession(context, packageName, audioSession);
         }
-
-        // set params
-        if (action.equals("AudioEffect.ACTION_SET_PARAM")) {
-            final String param = intent.getStringExtra("AudioEffect.EXTRA_PARAM");
-
-            if (param.equals("GLOBAL_ENABLED")) {
-                final Boolean value = intent.getBooleanExtra("AudioEffect.EXTRA_VALUE", false);
-                ControlPanelEffect.setParameterBoolean(context,
-                        ControlPanelEffect.Key.global_enabled, value);
-            }
-        }
-
-        // get params
-        if (action.equals("AudioEffect.ACTION_GET_PARAM")) {
-            final String param = intent.getStringExtra("AudioEffect.EXTRA_PARAM");
-
-            if (param.equals("GLOBAL_ENABLED")) {
-                final Boolean value = ControlPanelEffect.getParameterBoolean(context,
-                        ControlPanelEffect.Key.global_enabled);
-                final Bundle extras = new Bundle();
-                extras.putBoolean("GLOBAL_ENABLED", value);
-                setResultExtras(extras);
-            }
-        }
     }
 }

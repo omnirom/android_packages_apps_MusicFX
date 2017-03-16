@@ -133,6 +133,9 @@ public class ActivityMusic extends Activity {
     private StringBuilder mFormatBuilder = new StringBuilder();
     private Formatter mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
 
+    // TODO
+    private String mCurrentLevel = ControlPanelEffect.SPEAKER_PREF_SCOPE;
+
     // Preset Reverb fields
     /**
      * Array containing RSid of preset reverb names.
@@ -250,11 +253,11 @@ public class ActivityMusic extends Activity {
 
         // Fill array with presets from AudioEffects call.
         // allocate a space for 1 extra strings (User)
-        final int numPresets = ControlPanelEffect.getParameterInt(mContext,
+        final int numPresets = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_num_presets);
         mEQPresetNames = new String[numPresets + 1];
         for (short i = 0; i < numPresets; i++) {
-            final String eqPresetName = ControlPanelEffect.getParameterString(mContext,
+            final String eqPresetName = ControlPanelEffect.getParameterString(mContext, mCurrentLevel,
                     ControlPanelEffect.Key.eq_preset_name, i);
             mEQPresetNames[i] = localizePresetName(eqPresetName);
         }
@@ -281,7 +284,7 @@ public class ActivityMusic extends Activity {
                         final boolean isChecked) {
                     toggleSwithText.setText(isChecked? R.string.toggle_button_on : R.string.toggle_button_off);
                     // set parameter and state
-                    ControlPanelEffect.setEnabled(mContext, isChecked);
+                    ControlPanelEffect.setEnabled(mContext, mCurrentLevel, isChecked);
                     // Enable Linear layout (in scroll layout) view with all
                     // effect contents depending on checked state
                     setEnabledAllChildren(viewGroup, isChecked);
@@ -307,7 +310,7 @@ public class ActivityMusic extends Activity {
                     public void onValueChanged(final Knob knob, final int value,
                         final boolean fromUser) {
                         // set parameter and state
-                        ControlPanelEffect.setParameterInt(mContext,
+                        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                                 ControlPanelEffect.Key.virt_strength, value);
                     }
 
@@ -321,7 +324,7 @@ public class ActivityMusic extends Activity {
                             }
                             return false;
                         }
-                        ControlPanelEffect.setParameterBoolean(mContext,
+                        ControlPanelEffect.setParameterBoolean(mContext, mCurrentLevel,
                                 ControlPanelEffect.Key.virt_enabled, on);
                         return true;
                     }
@@ -342,7 +345,7 @@ public class ActivityMusic extends Activity {
                     public void onValueChanged(final Knob knob, final int value,
                             final boolean fromUser) {
                         // set parameter and state
-                        ControlPanelEffect.setParameterInt(mContext,
+                        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                                 ControlPanelEffect.Key.bb_strength, value);
                     }
 
@@ -356,7 +359,7 @@ public class ActivityMusic extends Activity {
                             }
                             return false;
                         }
-                        ControlPanelEffect.setParameterBoolean(mContext,
+                        ControlPanelEffect.setParameterBoolean(mContext, mCurrentLevel,
                                 ControlPanelEffect.Key.bb_enabled, on);
                         return true;
                     }
@@ -365,7 +368,7 @@ public class ActivityMusic extends Activity {
 
             // Initialize the Equalizer elements.
             if (mEqualizerSupported) {
-                mEQPreset = ControlPanelEffect.getParameterInt(mContext,
+                mEQPreset = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                         ControlPanelEffect.Key.eq_current_preset);
                 if (mEQPreset >= mEQPresetNames.length) {
                     mEQPreset = 0;
@@ -377,7 +380,7 @@ public class ActivityMusic extends Activity {
             // Initialize the Preset Reverb elements.
             // Set Spinner listeners.
             if (mPresetReverbSupported) {
-                mPRPreset = ControlPanelEffect.getParameterInt(mContext,
+                mPRPreset = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                         ControlPanelEffect.Key.pr_current_preset);
                 mPRPresetPrevious = mPRPreset;
                 reverbSpinnerInit((Spinner)findViewById(R.id.prSpinner));
@@ -523,11 +526,11 @@ public class ActivityMusic extends Activity {
             }
 
             if (enabled && view == virt) {
-                on = ControlPanelEffect.getParameterBoolean(mContext,
+                on = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                         ControlPanelEffect.Key.virt_enabled);
                 view.setEnabled(on);
             } else if (enabled && view == bb) {
-                on = ControlPanelEffect.getParameterBoolean(mContext,
+                on = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                         ControlPanelEffect.Key.bb_enabled);
                 view.setEnabled(on);
             } else if (enabled && view == eq) {
@@ -543,7 +546,7 @@ public class ActivityMusic extends Activity {
      * Updates UI (checkbox, seekbars, enabled states) according to the current stored preferences.
      */
     private void updateUI() {
-        final boolean isEnabled = ControlPanelEffect.getParameterBoolean(mContext,
+        final boolean isEnabled = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.global_enabled);
         mToggleSwitch.setChecked(isEnabled);
         toggleSwithText.setText(isEnabled? R.string.toggle_button_on : R.string.toggle_button_off);
@@ -553,18 +556,18 @@ public class ActivityMusic extends Activity {
         if (mVirtualizerSupported) {
             Knob knob = (Knob) findViewById(R.id.vIStrengthKnob);
             int strength = ControlPanelEffect
-                    .getParameterInt(mContext,
+                    .getParameterInt(mContext, mCurrentLevel,
                             ControlPanelEffect.Key.virt_strength);
             knob.setValue(strength);
             boolean hasStrength = ControlPanelEffect.getParameterBoolean(mContext,
-                    ControlPanelEffect.Key.virt_strength_supported);
+                    mCurrentLevel, ControlPanelEffect.Key.virt_strength_supported);
             if (!hasStrength) {
                 knob.setVisibility(View.GONE);
             }
         }
         if (mBassBoostSupported) {
             ((Knob) findViewById(R.id.bBStrengthKnob)).setValue(ControlPanelEffect
-                    .getParameterInt(mContext,
+                    .getParameterInt(mContext, mCurrentLevel,
                             ControlPanelEffect.Key.bb_strength));
         }
         if (mEqualizerSupported) {
@@ -572,7 +575,7 @@ public class ActivityMusic extends Activity {
         }
         if (mPresetReverbSupported) {
             int reverb = ControlPanelEffect.getParameterInt(
-                                    mContext,
+                                    mContext, mCurrentLevel,
                                     ControlPanelEffect.Key.pr_current_preset);
             ((Spinner)findViewById(R.id.prSpinner)).setSelection(reverb);
         }
@@ -614,11 +617,11 @@ public class ActivityMusic extends Activity {
                 && (mIsHeadsetOn || mIsSpeakerOn));
 
         if (!force) {
-            boolean on = ControlPanelEffect.getParameterBoolean(mContext,
+            boolean on = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                     ControlPanelEffect.Key.bb_enabled);
             bBKnob.setOn(mToggleSwitch.isChecked()
                     && (mIsHeadsetOn || mIsSpeakerOn) && on);
-            on = ControlPanelEffect.getParameterBoolean(mContext,
+            on = ControlPanelEffect.getParameterBoolean(mContext, mCurrentLevel,
                     ControlPanelEffect.Key.virt_enabled);
             vIKnob.setOn(mToggleSwitch.isChecked()
                     && (mIsHeadsetOn || mIsSpeakerOn) && on);
@@ -630,13 +633,13 @@ public class ActivityMusic extends Activity {
      */
     private void equalizerBandsInit(LinearLayout eqcontainer) {
         // Initialize the N-Band Equalizer elements.
-        mNumberEqualizerBands = ControlPanelEffect.getParameterInt(mContext,
+        mNumberEqualizerBands = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_num_bands);
-        mEQPresetUserBandLevelsPrev = ControlPanelEffect.getParameterIntArray(mContext,
+        mEQPresetUserBandLevelsPrev = ControlPanelEffect.getParameterIntArray(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_preset_user_band_level);
-        final int[] centerFreqs = ControlPanelEffect.getParameterIntArray(mContext,
+        final int[] centerFreqs = ControlPanelEffect.getParameterIntArray(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_center_freq);
-        final int[] bandLevelRange = ControlPanelEffect.getParameterIntArray(mContext,
+        final int[] bandLevelRange = ControlPanelEffect.getParameterIntArray(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_level_range);
         mEqualizerMinBandLevel = (int) Math.min(EQUALIZER_MIN_LEVEL, bandLevelRange[0]);
         final int mEqualizerMaxBandLevel = (int) Math.max(EQUALIZER_MAX_LEVEL, bandLevelRange[1]);
@@ -736,7 +739,7 @@ public class ActivityMusic extends Activity {
     private void equalizerUpdateDisplay() {
         // Update and show the active N-Band Equalizer bands.
         final int[] bandLevels = ControlPanelEffect.getParameterIntArray(mContext,
-                ControlPanelEffect.Key.eq_band_level);
+                mCurrentLevel, ControlPanelEffect.Key.eq_band_level);
         for (short band = 0; band < mNumberEqualizerBands; band++) {
             final int level = bandLevels[band];
             final int progress = level - mEqualizerMinBandLevel;
@@ -753,7 +756,7 @@ public class ActivityMusic extends Activity {
      *            EQ band level
      */
     private void equalizerBandUpdate(final int band, final int level) {
-        ControlPanelEffect.setParameterInt(mContext,
+        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_band_level, level, band);
     }
 
@@ -764,7 +767,7 @@ public class ActivityMusic extends Activity {
      *            EQ preset id.
      */
     private void equalizerSetPreset(final int preset) {
-        ControlPanelEffect.setParameterInt(mContext,
+        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_current_preset, preset);
         equalizerUpdateDisplay();
     }
@@ -776,7 +779,7 @@ public class ActivityMusic extends Activity {
      *            PR preset id.
      */
     private void presetReverbSetPreset(final int preset) {
-        ControlPanelEffect.setParameterInt(mContext,
+        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.pr_current_preset, preset);
     }
 
