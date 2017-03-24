@@ -119,6 +119,7 @@ public class ActivityMusic extends AppCompatActivity {
      * Indicates if Preset Reverb effect is supported.
      */
     private boolean mPresetReverbSupported;
+    private boolean mStereoWideSupported;
 
     // Equalizer fields
     private final Visualizer[] mEqualizerVisualizer = new Visualizer[EQUALIZER_MAX_BANDS];
@@ -129,9 +130,12 @@ public class ActivityMusic extends AppCompatActivity {
     private int[] mEQPresetUserBandLevelsPrev;
     private String[] mEQPresetNames;
     private String[] mReverbPresetNames;
+    private String[] mSWStrengthNames;
 
     private int mPRPreset;
     private int mPRPresetPrevious;
+    private int mSWStrength;
+    private int mSWStrengthPrevious;
 
     private boolean mIsHeadsetOn = false;
     private boolean mIsSpeakerOn = false;
@@ -168,8 +172,8 @@ public class ActivityMusic extends AppCompatActivity {
             final String action = intent.getAction();
             if (action.equals(ControlPanelEffect.PREF_SCOPE_CHANGED)) {
                 Log.i(TAG, "onReceive " + action);
-                if ((mVirtualizerSupported) || (mBassBoostSupported) || (mEqualizerSupported)
-                        || (mPresetReverbSupported)) {
+                if (mVirtualizerSupported || mBassBoostSupported || mEqualizerSupported
+                        || mPresetReverbSupported || mStereoWideSupported) {
                     String currentLevel = ControlPanelEffect.getCurrentPrevLevel(ActivityMusic.this);
                     updateCurrentLevelInfo(currentLevel);
                 }
@@ -218,6 +222,8 @@ public class ActivityMusic extends AppCompatActivity {
                 mEqualizerSupported = true;
             } else if (effect.type.equals(AudioEffect.EFFECT_TYPE_PRESET_REVERB)) {
                 mPresetReverbSupported = true;
+            } else if (effect.type.equals(AudioEffect.EFFECT_TYPE_STEREOWIDE)) {
+                mStereoWideSupported = true;
             }
         }
 
@@ -246,12 +252,14 @@ public class ActivityMusic extends AppCompatActivity {
         for (short i = 0; i < mReverbPresetRSids.length; ++i) {
             mReverbPresetNames[i] = getString(mReverbPresetRSids[i]);
         }
+        mSWStrengthNames = getResources().getStringArray(R.array.stereowide_modes);
+
         mCurrentLevelText = (TextView)findViewById(R.id.switchstatus);
         mCurrentLevelText.setCompoundDrawableTintList(new ColorStateList(new int[][] { new int[0] }, new int[] { getResources().getColor(R.color.current_level_color) }));
 
         // Watch for button clicks and initialization.
-        if ((mVirtualizerSupported) || (mBassBoostSupported) || (mEqualizerSupported)
-                || (mPresetReverbSupported)) {
+        if (mVirtualizerSupported || mBassBoostSupported || mEqualizerSupported
+                || mPresetReverbSupported || mStereoWideSupported) {
             // Initialize the Virtualizer elements.
             // Set the SeekBar listener.
             if (mVirtualizerSupported) {
@@ -330,6 +338,15 @@ public class ActivityMusic extends AppCompatActivity {
                 reverbSpinnerInit((Spinner)findViewById(R.id.prSpinner));
             }
 
+            Spinner swSpinner = (Spinner)findViewById(R.id.swSpinner);
+            if (mStereoWideSupported) {
+                mSWStrength = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
+                        ControlPanelEffect.Key.sw_strength) + 1;
+                mSWStrengthPrevious = mSWStrength;
+                stereoWideSpinnerInit(swSpinner);
+            } else {
+                swSpinner.setVisibility(View.GONE);
+            }
         } else {
             mViewGroup.setVisibility(View.GONE);
             ((TextView) findViewById(R.id.noEffectsTextView)).setVisibility(View.VISIBLE);
@@ -476,8 +493,8 @@ public class ActivityMusic extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if ((mVirtualizerSupported) || (mBassBoostSupported) || (mEqualizerSupported)
-                || (mPresetReverbSupported)) {
+        if (mVirtualizerSupported || mBassBoostSupported || mEqualizerSupported
+                || mPresetReverbSupported || mStereoWideSupported) {
 
             if (!isServiceRunning()) {
                 if (!SystemProperties.getBoolean("ro.musicfx.disabled", false)) {
@@ -533,6 +550,27 @@ public class ActivityMusic extends AppCompatActivity {
             }
         });
         spinner.setSelection(mPRPreset);
+    }
+
+    private void stereoWideSpinnerInit(Spinner spinner) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                R.layout.spinner_item, mSWStrengthNames);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position != mSWStrengthPrevious) {
+                    stereoWideSetStrength(position);
+                }
+                mSWStrengthPrevious = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        spinner.setSelection(mSWStrength);
     }
 
     private void equalizerPresetsInit() {
@@ -631,7 +669,11 @@ public class ActivityMusic extends AppCompatActivity {
                                     ControlPanelEffect.Key.pr_current_preset);
             ((Spinner)findViewById(R.id.prSpinner)).setSelection(mPRPreset);
         }
-
+        if (mStereoWideSupported) {
+            mSWStrength = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
+                    ControlPanelEffect.Key.sw_strength) + 1;
+            ((Spinner)findViewById(R.id.swSpinner)).setSelection(mSWStrength);
+        }
         setInterception(isEnabled);
     }
 
@@ -834,6 +876,15 @@ public class ActivityMusic extends AppCompatActivity {
     private void presetReverbSetPreset(final int preset) {
         ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.pr_current_preset, preset);
+        ControlPanelEffect.setParameterBoolean(mContext, mCurrentLevel,
+                ControlPanelEffect.Key.pr_enabled, preset != 0);
+    }
+
+    private void stereoWideSetStrength(final int strength) {
+        ControlPanelEffect.setParameterInt(mContext, mCurrentLevel,
+                ControlPanelEffect.Key.sw_strength, strength - 1);
+        ControlPanelEffect.setParameterBoolean(mContext, mCurrentLevel,
+                ControlPanelEffect.Key.sw_enabled, strength != 0);
     }
 
     /**
