@@ -39,6 +39,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -47,6 +48,7 @@ import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.media.audiofx.AudioEffect.Descriptor;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.SystemProperties;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -69,6 +71,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -81,6 +84,14 @@ import android.util.DisplayMetrics;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.UUID;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 
 /**
  *
@@ -172,6 +183,11 @@ public class ActivityMusic extends AppCompatActivity {
         R.string.mediumhall, R.string.largehall, R.string.plate
     };
 
+	/**
+	 * Presets
+ 	 */
+    private static final String PRESETS_FOLDER = "DSPPresets";
+	
     /**
      * Context field
      */
@@ -182,7 +198,7 @@ public class ActivityMusic extends AppCompatActivity {
         public void onReceive(final Context context, final Intent intent) {
             final String action = intent.getAction();
             if (action.equals(ControlPanelEffect.PREF_SCOPE_CHANGED)) {
-                Log.i(TAG, "onReceive " + action);
+                Log.i(TAG, "onReceive "   action);
                 if (mVirtualizerSupported || mBassBoostSupported || mEqualizerSupported
                         || mPresetReverbSupported || mStereoWideSupported) {
                     String currentLevel = ControlPanelEffect.getCurrentPrevLevel(ActivityMusic.this);
@@ -207,9 +223,12 @@ public class ActivityMusic extends AppCompatActivity {
         // Init context to be used in listeners
         mContext = this;
         mCurrentLevel = ControlPanelEffect.getCurrentPrevLevel(this);
-        Log.d(TAG, "onCreate " + mCurrentLevel);
+        Log.d(TAG, "onCreate "   mCurrentLevel);
 
         ControlPanelEffect.initEffectsPreferences(mContext);
+
+        // Init presets
+        getPreferenceManager().setSharedPreferencesMode(Context.MODE_MULTI_PROCESS);
 
         // query available effects
         final Descriptor[] effects = AudioEffect.queryEffects();
@@ -217,7 +236,7 @@ public class ActivityMusic extends AppCompatActivity {
         // Determine available/supported effects
         Log.d(TAG, "Available effects:");
         for (final Descriptor effect : effects) {
-            Log.d(TAG, effect.name.toString() + ", type: " + effect.type.toString());
+            Log.d(TAG, effect.name.toString()   ", type: "   effect.type.toString());
 
             if (effect.type.equals(AudioEffect.EFFECT_TYPE_VIRTUALIZER)) {
                 mVirtualizerSupported = true;
@@ -225,7 +244,7 @@ public class ActivityMusic extends AppCompatActivity {
                     || effect.uuid.equals(UUID.fromString("e6c98a16-22a3-11e2-b87b-f23c91aec05e"))
                     || effect.uuid.equals(UUID.fromString("d3467faa-acc7-4d34-acaf-0002a5d5c51b"))) {
                     mVirtualizerIsHeadphoneOnly = true;
-                    Log.d(TAG, effect.name.toString() + ", mVirtualizerIsHeadphoneOnly = " + mVirtualizerIsHeadphoneOnly);
+                    Log.d(TAG, effect.name.toString()   ", mVirtualizerIsHeadphoneOnly = "   mVirtualizerIsHeadphoneOnly);
                 }
             } else if (effect.type.equals(AudioEffect.EFFECT_TYPE_BASS_BOOST)) {
                 mBassBoostSupported = true;
@@ -251,8 +270,8 @@ public class ActivityMusic extends AppCompatActivity {
         // allocate a space for 1 extra strings (User)
         final int numPresets = ControlPanelEffect.getParameterInt(mContext, mCurrentLevel,
                 ControlPanelEffect.Key.eq_num_presets);
-        mEQPresetNames = new String[numPresets + 1];
-        for (short i = 0; i < numPresets; i++) {
+        mEQPresetNames = new String[numPresets   1];
+        for (short i = 0; i < numPresets; i  ) {
             final String eqPresetName = ControlPanelEffect.getParameterString(mContext, mCurrentLevel,
                     ControlPanelEffect.Key.eq_preset_name, i);
             mEQPresetNames[i] = localizePresetName(eqPresetName);
@@ -262,7 +281,7 @@ public class ActivityMusic extends AppCompatActivity {
 
         // Load string resource of reverb presets
         mReverbPresetNames = new String[mReverbPresetRSids.length];
-        for (short i = 0; i < mReverbPresetRSids.length; ++i) {
+        for (short i = 0; i < mReverbPresetRSids.length;   i) {
             mReverbPresetNames[i] = getString(mReverbPresetRSids[i]);
         }
         mSWStrengthNames = getResources().getStringArray(R.array.stereowide_modes);
@@ -497,6 +516,17 @@ public class ActivityMusic extends AppCompatActivity {
         if (id == R.id.toolbar_switch) {
             return true;
         }
+
+        if (id == R.id.save_preset) {
+            savePresetDialog();
+            return true;
+        }
+
+        if (id == R.id.load_preset) {
+            loadPresetDialog();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -674,7 +704,7 @@ public class ActivityMusic extends AppCompatActivity {
         final View eq = findViewById(R.id.eqcontainer);
         boolean on = true;
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i  ) {
             final View view = viewGroup.getChildAt(i);
             if ((view instanceof LinearLayout) || (view instanceof RelativeLayout)) {
                 final ViewGroup vg = (ViewGroup) view;
@@ -814,9 +844,9 @@ public class ActivityMusic extends AppCompatActivity {
             @Override
             public void onProgressChanged(final Visualizer v, final int progress,
                     final boolean fromUser) {
-                for (short band = 0; band < mNumberEqualizerBands; ++band) {
+                for (short band = 0; band < mNumberEqualizerBands;   band) {
                     if (mEqualizerVisualizer[band] == v) {
-                        final short level = (short) (progress + mEqualizerMinBandLevel);
+                        final short level = (short) (progress   mEqualizerMinBandLevel);
                         if (fromUser) {
                             equalizerBandUpdate(band, level);
                         }
@@ -859,7 +889,7 @@ public class ActivityMusic extends AppCompatActivity {
         final int pixels = getResources().getDimensionPixelOffset(R.dimen.each_visualizer_width);
         final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 pixels, ViewGroup.LayoutParams.MATCH_PARENT);
-        for (int band = 0; band < mNumberEqualizerBands; band++) {
+        for (int band = 0; band < mNumberEqualizerBands; band  ) {
             // Unit conversion from mHz to Hz and use k prefix if necessary to display
             final int centerFreq = centerFreqs[band] / 1000;
             float centerFreqHz = centerFreq;
@@ -870,7 +900,7 @@ public class ActivityMusic extends AppCompatActivity {
             }
 
             final Visualizer v = new Visualizer(mContext);
-            v.setText(format("%.0f", centerFreqHz) + unitPrefix);
+            v.setText(format("%.0f", centerFreqHz)   unitPrefix);
             v.setMax(mEqualizerMaxBandLevel - mEqualizerMinBandLevel);
             v.setOnSeekBarChangeListener(listener);
             v.setOnTouchListener(tl);
@@ -879,7 +909,7 @@ public class ActivityMusic extends AppCompatActivity {
         }
 
         TextView tv = (TextView) findViewById(R.id.maxLevelText);
-        tv.setText(String.format("+%d dB", (int) Math.ceil(mEqualizerMaxBandLevel / 100)));
+        tv.setText(String.format(" %d dB", (int) Math.ceil(mEqualizerMaxBandLevel / 100)));
         tv = (TextView) findViewById(R.id.centerLevelText);
         tv.setText("0 dB");
         tv = (TextView) findViewById(R.id.minLevelText);
@@ -893,7 +923,7 @@ public class ActivityMusic extends AppCompatActivity {
     }
 
     private void showSeekBar(boolean show) {
-        for (int i = 0; i < mNumberEqualizerBands; ++i) {
+        for (int i = 0; i < mNumberEqualizerBands;   i) {
             mEqualizerVisualizer[i].setShowSeekBar(show);
         }
     }
@@ -905,7 +935,7 @@ public class ActivityMusic extends AppCompatActivity {
         // Update and show the active N-Band Equalizer bands.
         final int[] bandLevels = ControlPanelEffect.getParameterIntArray(mContext,
                 mCurrentLevel, ControlPanelEffect.Key.eq_band_level);
-        for (short band = 0; band < mNumberEqualizerBands; band++) {
+        for (short band = 0; band < mNumberEqualizerBands; band  ) {
             final int level = bandLevels[band];
             final int progress = level - mEqualizerMinBandLevel;
             mEqualizerVisualizer[band].setProgress(progress);
@@ -971,10 +1001,145 @@ public class ActivityMusic extends AppCompatActivity {
     private boolean isServiceRunning() {
         final ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (service.service.getClassName().equals(getPackageName() + ".SystemService")) {
+            if (service.service.getClassName().equals(getPackageName()   ".SystemService")) {
                 return true;
             }
         }
         return false;
+    }
+
+     public void savePresetDialog() {
+          // We first list existing presets
+          File presetsDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()   "/"   PRESETS_FOLDER);
+          presetsDir.mkdirs();
+
+          Log.e("MusixFX", "Saving preset to "   presetsDir.getAbsolutePath());
+
+          // The first entry is "New preset", so we offset
+          File[] presets = presetsDir.listFiles((FileFilter) null);
+          final String[] names = new String[presets != null ? presets.length 1 : 1];
+          names[0] = getString(R.string.new_preset);
+          if (presets != null) {
+            for (int i = 0; i < presets.length; i  ) {
+              names[i 1] = presets[i].getName();
+            }
+          }
+    
+        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMusic.this);
+        builder.setTitle(R.string.save_preset)
+               .setItems(names, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int which) {
+                       if (which == 0) {
+                           // New preset, we ask for the name
+                           AlertDialog.Builder inputBuilder = new AlertDialog.Builder(ActivityMusic.this);
+
+                           inputBuilder.setTitle(R.string.new_preset);
+
+                           // Set an EditText view to get user input 
+                           final EditText input = new EditText(ActivityMusic.this);
+                           inputBuilder.setView(input);
+
+                           inputBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                               public void onClick(DialogInterface dialog, int whichButton) {
+                                   String value = input.getText().toString();
+                                   savePreset(value);
+                               }
+                           });
+                           inputBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                               public void onClick(DialogInterface dialog, int whichButton) {
+                                   // Canceled.
+                               }
+                           });
+
+                           inputBuilder.show();
+                       } else {
+                           savePreset(names[which]);
+                       }
+                   }
+        });
+        Dialog dlg = builder.create();
+        dlg.show();
+    }
+
+    public void loadPresetDialog() {
+        File presetsDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + PRESETS_FOLDER);
+        presetsDir.mkdirs();
+
+        File[] presets = presetsDir.listFiles((FileFilter) null);
+        final String[] names = new String[presets != null ? presets.length : 0];
+        if (presets != null) {
+            for (int i = 0; i < presets.length; i++) {
+                names[i] = presets[i].getName();
+            }
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMusic.this);
+        builder.setTitle(R.string.load_preset)
+               .setItems(names, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int which) {
+                       loadPreset(names[which]);
+                   }
+        });
+        builder.create().show();
+    }
+
+    public void savePreset(String name) {
+        final String spDir = getApplicationInfo().dataDir+"/shared_prefs/";
+
+        // Copy the SharedPreference to our output directory
+        File presetDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + PRESETS_FOLDER + "/" + name);
+        presetDir.mkdirs();
+
+        Log.e("MusicFX", "Saving preset to " + presetDir.getAbsolutePath());
+
+        final String packageName = "com.android.musicfx";
+        File bluetooth = new File(presetDir, packageName+"bluetooth.xml");
+        File headset = new File(presetDir, packageName+"headset.xml");
+        File speaker = new File(presetDir, packageName+"speaker.xml");
+
+        try {
+        copy(new File(spDir+packageName+"bluetooth.xml"), bluetooth);
+        copy(new File(spDir+packageName+"headset.xml"), headset);
+        copy(new File(spDir+packageName+"speaker.xml"), speaker);
+        } catch (IOException e) {
+            Log.e("MusicFx", "Cannot save preset", e);
+        }
+    }
+
+    public void loadPreset(String name) {
+        // Copy the SharedPreference to our local directory
+        File presetDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + PRESETS_FOLDER + "/" + name);
+        if (!presetDir.exists()) presetDir.mkdirs();
+
+        final String packageName = "com.android.musicfx";
+        final String spDir = getApplicationInfo().dataDir+"/shared_prefs/";
+
+        try {
+        copy(new File(presetDir, packageName+"bluetooth.xml"), new File(spDir+packageName+"bluetooth.xml"));
+        copy(new File(presetDir, packageName+"headset.xml"), new File(spDir+packageName+"headset.xml"));
+        copy(new File(presetDir, packageName+"speaker.xml"), new File(spDir+packageName+"speaker.xml"));
+        } catch (IOException e) {
+            Log.e("MusicFx", "Cannot load preset", e);
+        }
+
+        // Reload preferences
+        startActivity(new Intent(this, ActivityMusic.class));
+        finish();
+    }
+  
+    public static void copy(File src, File dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        Log.e("MusicFx", "Copying " + src.getAbsolutePath() + " to " + dst.getAbsolutePath());
+
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
     }
 }
