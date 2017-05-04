@@ -19,4 +19,11 @@ limitations under the License.
         android:id="@+id/toolbar_switch"
         app:showAsAction="always"
         app:actionLayout="@layout/toolbar_switch_layout"/>
+
+    <item android:id="@+id/save_preset"
+          android:title="@string/save_preset" />
+
+    <item android:id="@+id/load_preset"
+          android:title="@string/load_preset" />
+
 </menu>
