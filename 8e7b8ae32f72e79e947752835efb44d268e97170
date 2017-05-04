@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9828ed82_02924ca0",
+        "filename": "res/menu/toolbar_menu.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-05-04T21:21:40Z",
+      "side": 1,
+      "message": "I would put it into the drawer menu - with a separator",
+      "revId": "8e7b8ae32f72e79e947752835efb44d268e97170",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
