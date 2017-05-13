@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7825f9a7_d024220d",
+        "filename": "src/com/android/musicfx/ActivityMusic.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-05-13T12:55:06Z",
+      "side": 1,
+      "message": "guess you know why :)",
+      "revId": "ca9de947c632d60758bde325be6284b6d40d5fa0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7825f9a7_f0271e0f",
+        "filename": "src/com/android/musicfx/ActivityMusic.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-05-13T12:55:06Z",
+      "side": 1,
+      "message": "perms should always only be asked if really needed. if you never use a preset you should not be bothered with this",
+      "revId": "ca9de947c632d60758bde325be6284b6d40d5fa0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7825f9a7_b02196fb",
+        "filename": "src/com/android/musicfx/ActivityMusic.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-05-13T12:55:06Z",
+      "side": 1,
+      "message": "ask for perms only here",
+      "revId": "ca9de947c632d60758bde325be6284b6d40d5fa0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
