@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "306ce4bf_2bba4acb",
+        "filename": "src/com/android/musicfx/ActivityMusic.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 1289,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-03T14:19:05Z",
+      "side": 1,
+      "message": "why? you should read the files from the folder where you saved them as a preset. reading those will just read the actual ones",
+      "revId": "301e89e2e5ddc36a5dd5283061f174a745494689",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
