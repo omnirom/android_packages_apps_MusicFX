@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d08c76cc_7c2a54eb",
+        "filename": "src/com/android/musicfx/ActivityMusic.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-24T21:28:25Z",
+      "side": 1,
+      "message": "why copy files around - you can read the files right in preset dir no need to copy them around",
+      "revId": "34e0e690fb33c2d452179c23a02b95ee08680812",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74a5ec04_fa5f761a",
+        "filename": "src/com/android/musicfx/ActivityMusic.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 1133,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-24T21:28:25Z",
+      "side": 1,
+      "message": "not needed - see above",
+      "revId": "34e0e690fb33c2d452179c23a02b95ee08680812",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
