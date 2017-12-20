@@ -68,4 +68,6 @@
   <string name="save_preset">Hazır ayarı kaydet</string>
   <string name="load_preset">Hazır ayar yükle</string>
   <string name="new_preset">Yeni hazır ayar...</string>
+  <string name="preset_save_toast">Hazır ayar kaydedildi</string>
+  <string name="preset_load_toast">Hazır ayar yüklendi</string>
 </resources>
