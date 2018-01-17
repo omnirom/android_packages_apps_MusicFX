@@ -28,17 +28,8 @@
   <string name="pr_summary">İlâve oda yankılanması efektleri</string>
   <string name="pr_dialog_title">Hazır yankılanma ayarı</string>
   <string name="setup">Kurulum</string>
-  <string name="normal">Normal</string>
-  <string name="classical">Klasik</string>
-  <string name="dance">Dans</string>
   <string name="flat">Düz</string>
-  <string name="folk">Halk</string>
-  <string name="heavy_metal">Ağır Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Caz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">Elektronik</string>
   <string name="user">Hususî</string>
   <string name="none">Hiçbiri</string>
   <string name="smallroom">Küçük Oda</string>

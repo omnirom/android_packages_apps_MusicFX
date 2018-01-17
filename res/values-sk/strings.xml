@@ -28,17 +28,8 @@
   <string name="pr_summary">Dodatočné efekty ozveny v miestnosti</string>
   <string name="pr_dialog_title">Predvoľba ozveny</string>
   <string name="setup">Nastavenie</string>
-  <string name="normal">Normálny</string>
-  <string name="classical">Klasická hudba</string>
-  <string name="dance">Tanečný</string>
   <string name="flat">Plochý</string>
-  <string name="folk">Folk</string>
-  <string name="heavy_metal">Heavy metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">Elektro</string>
   <string name="user">Vlastný</string>
   <string name="none">Žiadne</string>
   <string name="smallroom">Malá miestnosť</string>

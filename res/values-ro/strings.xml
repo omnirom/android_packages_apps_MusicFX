@@ -28,17 +28,8 @@
   <string name="pr_summary">Efectele adiționale de reverberație a camerei</string>
   <string name="pr_dialog_title">Presetare reverbație</string>
   <string name="setup">Configurați</string>
-  <string name="normal">Normal</string>
-  <string name="classical">Clasic</string>
-  <string name="dance">Dance</string>
   <string name="flat">Plat</string>
-  <string name="folk">Folclor</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">Amplificator FX</string>
   <string name="user">Utilizator</string>
   <string name="none">Niciunul</string>
   <string name="smallroom">Cameră mică</string>

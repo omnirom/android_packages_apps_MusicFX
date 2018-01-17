@@ -28,17 +28,8 @@
   <string name="pr_summary">Efeitos adicionais de reverberação da sala</string>
   <string name="pr_dialog_title">Reverberação predefinida</string>
   <string name="setup">Configuração</string>
-  <string name="normal">Normal</string>
-  <string name="classical">Clássica</string>
-  <string name="dance">Dance</string>
   <string name="flat">Flat</string>
-  <string name="folk">Folk</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip-Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">Electrônica</string>
   <string name="user">Personalizado</string>
   <string name="none">Sem efeito</string>
   <string name="smallroom">Sala pequena</string>

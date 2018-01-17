@@ -28,17 +28,8 @@
   <string name="pr_summary">Efek gema ruangan lainnya</string>
   <string name="pr_dialog_title">Prasetel gema</string>
   <string name="setup">Penyiapan</string>
-  <string name="normal">Normal</string>
-  <string name="classical">Klasik</string>
-  <string name="dance">Dansa</string>
   <string name="flat">Datar</string>
-  <string name="folk">Lagu Rakyat</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">Penguat FX</string>
   <string name="user">Pengguna</string>
   <string name="none">Tiada</string>
   <string name="smallroom">RuangKecil</string>

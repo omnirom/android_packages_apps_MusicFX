@@ -28,17 +28,8 @@
   <string name="pr_summary">其他室内混响效果</string>
   <string name="pr_dialog_title">混响效果预设</string>
   <string name="setup">设置</string>
-  <string name="normal">普通</string>
-  <string name="classical">古典</string>
-  <string name="dance">舞曲</string>
   <string name="flat">原声</string>
-  <string name="folk">民谣</string>
-  <string name="heavy_metal">重金属</string>
-  <string name="hip_hop">嘻哈</string>
-  <string name="jazz">爵士</string>
-  <string name="pop">流行</string>
   <string name="rock">摇滚</string>
-  <string name="ci_extreme">电音</string>
   <string name="user">自定义</string>
   <string name="none">无</string>
   <string name="smallroom">小房间</string>

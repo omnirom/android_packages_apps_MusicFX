@@ -28,17 +28,8 @@
   <string name="pr_summary">Efeitos ambientais de eco</string>
   <string name="pr_dialog_title">Predefinição de eco</string>
   <string name="setup">Configuração</string>
-  <string name="normal">Normal</string>
-  <string name="classical">Clássica</string>
-  <string name="dance">Dança</string>
   <string name="flat">Plano</string>
-  <string name="folk">Folk</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">Amplificador FX</string>
   <string name="user">Utilizador</string>
   <string name="none">Nenhum</string>
   <string name="smallroom">Quarto pequeno</string>

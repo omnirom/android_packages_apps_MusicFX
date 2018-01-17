@@ -28,17 +28,8 @@
   <string name="pr_summary">Extra kamer galm effecten</string>
   <string name="pr_dialog_title">Galm voorkeursinstelling</string>
   <string name="setup">Instellen</string>
-  <string name="normal">Normaal</string>
-  <string name="classical">Klassiek</string>
-  <string name="dance">Dance</string>
   <string name="flat">Vlak</string>
-  <string name="folk">Folk</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">FX Booster</string>
   <string name="user">Gebruiker</string>
   <string name="none">Geen</string>
   <string name="smallroom">SmallRoom</string>

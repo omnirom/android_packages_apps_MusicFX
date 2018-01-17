@@ -28,17 +28,8 @@
   <string name="pr_summary">További visszaverődési hatások</string>
   <string name="pr_dialog_title">Visszaverődési készlet</string>
   <string name="setup">Beállítás</string>
-  <string name="normal">Normál</string>
-  <string name="classical">Klasszikus</string>
-  <string name="dance">Tánczene</string>
   <string name="flat">Lapos</string>
-  <string name="folk">Népi</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">FX booster</string>
   <string name="user">Egyéni</string>
   <string name="none">Nincs</string>
   <string name="smallroom">Kis szoba</string>

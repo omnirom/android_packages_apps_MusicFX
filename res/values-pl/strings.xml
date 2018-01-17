@@ -28,17 +28,8 @@
   <string name="pr_summary">Dodatkowe efekty pogłosu</string>
   <string name="pr_dialog_title">Przywróć ustawienia</string>
   <string name="setup">Konfiguracja</string>
-  <string name="normal">Normalny</string>
-  <string name="classical">Klasyczny</string>
-  <string name="dance">Taneczna</string>
   <string name="flat">Płaski</string>
-  <string name="folk">Folk</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">Wzmocnienie</string>
   <string name="user">Własne</string>
   <string name="none">Brak</string>
   <string name="smallroom">Mały Pokój</string>

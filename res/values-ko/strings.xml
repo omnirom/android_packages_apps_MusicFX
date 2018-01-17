@@ -27,13 +27,7 @@
   <string name="pr_dialog_title">잔향 프리셋</string>
   <string name="setup">설정</string>
   <string name="flat">플랫</string>
-  <string name="folk">포크</string>
-  <string name="heavy_metal">헤비메탈</string>
-  <string name="hip_hop">힙합</string>
-  <string name="jazz">재즈</string>
-  <string name="pop">팝</string>
   <string name="rock">락</string>
-  <string name="ci_extreme">FX 부스터</string>
   <string name="user">사용자</string>
   <string name="none">없음</string>
   <!-- title of control panel picker dialog [CHAR LIMIT=30] -->

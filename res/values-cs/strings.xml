@@ -28,17 +28,8 @@
   <string name="pr_summary">Efekty dozvuku v místnosti</string>
   <string name="pr_dialog_title">Dozvuk (předvolba)</string>
   <string name="setup">Konfigurace</string>
-  <string name="normal">Normální</string>
-  <string name="classical">Klasická Hudba</string>
-  <string name="dance">Dance</string>
   <string name="flat">Flat</string>
-  <string name="folk">Folk</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">FX Booster</string>
   <string name="user">Uživatel</string>
   <string name="none">Nic</string>
   <string name="smallroom">SmallRoom</string>
