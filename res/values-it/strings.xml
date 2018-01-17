@@ -28,17 +28,8 @@
   <string name="pr_summary">Ulteriori effetti di riverbero nella stanza</string>
   <string name="pr_dialog_title">Azzera riverbero</string>
   <string name="setup">Configurazione</string>
-  <string name="normal">Normale</string>
-  <string name="classical">Classica</string>
-  <string name="dance">Dance</string>
   <string name="flat">Flat</string>
-  <string name="folk">Folk</string>
-  <string name="heavy_metal">Heavy Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Jazz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rock</string>
-  <string name="ci_extreme">FX booster</string>
   <string name="user">Utente</string>
   <string name="none">Nessuno</string>
   <string name="smallroom">Stanza piccola</string>

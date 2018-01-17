@@ -28,17 +28,8 @@
   <string name="pr_summary">Əlavə room reverb effektləri</string>
   <string name="pr_dialog_title">Hazır əks-səda</string>
   <string name="setup">Qur</string>
-  <string name="normal">Normal</string>
-  <string name="classical">Klassik</string>
-  <string name="dance">Rəqs</string>
   <string name="flat">Düz</string>
-  <string name="folk">Xalq</string>
-  <string name="heavy_metal">Ağır Metal</string>
-  <string name="hip_hop">Hip Hop</string>
-  <string name="jazz">Caz</string>
-  <string name="pop">Pop</string>
   <string name="rock">Rok</string>
-  <string name="ci_extreme">Elektronik</string>
   <string name="user">Fərdi</string>
   <string name="none">Heç biri</string>
   <string name="smallroom">KiçikOtaq</string>
