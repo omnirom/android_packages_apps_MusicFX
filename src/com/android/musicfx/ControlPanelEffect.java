@@ -83,7 +83,7 @@ public class ControlPanelEffect {
         final Equalizer mEqualizer;
         final BassBoost mBassBoost;
         final Virtualizer mVirtualizer;
-        final PresetReverb mPresetReverb;
+        PresetReverb mPresetReverb;
         StereoWide mStereoWide;
         int mAudioSession;
 
@@ -92,7 +92,11 @@ public class ControlPanelEffect {
             mEqualizer = new Equalizer(0, sessionId);
             mBassBoost = new BassBoost(0, sessionId);
             mVirtualizer = new Virtualizer(0, sessionId);
-            mPresetReverb = new PresetReverb(0, sessionId);
+            try {
+                mPresetReverb = new PresetReverb(0, sessionId);
+            } catch(Exception e) {
+                mPresetReverb = null;
+            }
             try {
                 mStereoWide = new StereoWide(0, sessionId);
             } catch(Exception e) {
@@ -104,7 +108,9 @@ public class ControlPanelEffect {
             mEqualizer.release();
             mBassBoost.release();
             mVirtualizer.release();
-            mPresetReverb.release();
+            if (mPresetReverb != null) {
+                mPresetReverb.release();
+            }
             if (mStereoWide != null) {
                 mStereoWide.release();
             }
@@ -591,10 +597,12 @@ public class ControlPanelEffect {
         boolean bbOn = prefs.getBoolean(Key.bb_enabled.toString(), BASS_BOOST_ENABLED_DEFAULT);
         effectSet.mBassBoost.setEnabled(isGlobalEnabled && bbOn);
 
-        final short preset = (short) prefs.getInt(Key.pr_current_preset.toString(), PRESET_REVERB_CURRENT_PRESET_DEFAULT);
-        effectSet.mPresetReverb.setPreset(preset);
-        boolean reverbOn = prefs.getBoolean(Key.pr_enabled.toString(), PRESET_REVERB_ENABLED_DEFAULT);
-        effectSet.mPresetReverb.setEnabled(isGlobalEnabled && reverbOn);
+        if (effectSet.mPresetReverb != null) {
+            final short preset = (short) prefs.getInt(Key.pr_current_preset.toString(), PRESET_REVERB_CURRENT_PRESET_DEFAULT);
+            effectSet.mPresetReverb.setPreset(preset);
+            boolean reverbOn = prefs.getBoolean(Key.pr_enabled.toString(), PRESET_REVERB_ENABLED_DEFAULT);
+            effectSet.mPresetReverb.setEnabled(isGlobalEnabled && reverbOn);
+        }
 
         int eQPreset = (short) prefs .getInt(Key.eq_current_preset.toString(), mEQNumPresets);
         final int numBands = prefs.getInt(Key.eq_num_bands.toString(),
