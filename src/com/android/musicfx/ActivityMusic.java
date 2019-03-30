@@ -60,6 +60,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.NavigationView;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -1040,13 +1041,14 @@ public class ActivityMusic extends AppCompatActivity {
             }
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMusic.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogTheme));
         builder.setTitle(R.string.save_preset)
                 .setItems(names, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
                             // New preset, we ask for the name
-                            AlertDialog.Builder inputBuilder = new AlertDialog.Builder(ActivityMusic.this);
+                            AlertDialog.Builder inputBuilder = new AlertDialog.Builder(
+                                    new ContextThemeWrapper(ActivityMusic.this, R.style.AlertDialogTheme));
                             inputBuilder.setTitle(R.string.new_preset);
 
                             // Set an EditText view to get user input
@@ -1083,7 +1085,7 @@ public class ActivityMusic extends AppCompatActivity {
             }
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMusic.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogTheme));
         builder.setTitle(R.string.load_preset)
                 .setItems(names, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
