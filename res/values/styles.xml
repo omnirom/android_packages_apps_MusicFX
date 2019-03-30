@@ -48,4 +48,8 @@
     <style name="ToolbarSwitchTheme" >
         <item name="android:colorControlActivated">@color/toolbar_thumb_color</item>
     </style>
+
+    <style name="AlertDialogTheme" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
+        <item name="android:colorAccent">@color/accentColor</item>
+    </style>
 </resources>
