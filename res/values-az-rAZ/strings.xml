@@ -17,12 +17,12 @@
 <resources>
     <string name="app_name">MusicFX</string>
     <!-- ControlPanelMusic strings -->
-    <string name="no_effects">Efectele nu sunt disponibile.</string>
-    <string name="eq_dialog_title">Egalizator</string>
-    <string name="headset_plug">Pentru aceste efecte trebuie să conectați căștile.</string>
-    <string name="bass_boost_strength">Amplificare bas</string>
-    <string name="virtualizer_strength">Sunet surround</string>
-    <string name="setup">Configurați</string>
+    <string name="no_effects">Effektlər mövcud deyil.</string>
+    <string name="eq_dialog_title">Tarazlayıcı</string>
+    <string name="headset_plug">Bu effektlər üçün qulaqcıq taxın.</string>
+    <string name="bass_boost_strength">Bass Gücləndirmək</string>
+    <string name="virtualizer_strength">Dəyişkən Səs</string>
+    <string name="setup">Qur</string>
     <!-- title of control panel picker dialog [CHAR LIMIT=30] -->
-    <string name="picker_title">Pan. de cont. cu efecte muz.</string>
+    <string name="picker_title">Nəzarətçi paneli</string>
 </resources>
