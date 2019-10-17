@@ -22,5 +22,6 @@
     <string name="bass_boost_strength">Bassivõimendus</string>
     <string name="virtualizer_strength">Ruumiline heli</string>
     <string name="setup">Seadistus</string>
+    <string name="user">Kasutaja</string>
     <!-- title of control panel picker dialog [CHAR LIMIT=30] -->
 </resources>
