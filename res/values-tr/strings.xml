@@ -16,7 +16,7 @@
 <resources>
     <string name="app_name">MusicFX</string>
     <!-- ControlPanelMusic strings -->
-    <string name="no_effects">Efektler mevcûd değil.</string>
+    <string name="no_effects">Efektler kullanılabilir değil.</string>
     <string name="eq_dialog_title">Dengeleyici</string>
     <string name="headset_plug">Bu efektler için kulaklığı takın.</string>
     <string name="bass_boost_strength">Bas güçlendirmesi</string>
